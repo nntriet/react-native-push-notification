@@ -173,7 +173,7 @@ public class RNPushNotificationHelper {
             Resources res = context.getResources();
             String packageName = context.getPackageName();
 
-            String channel_id = NOTIFICATION_CHANNEL_ID;
+            String channel_id = this.config.getChannelId() != null ? this.config.getChannelId() : NOTIFICATION_CHANNEL_ID;
 
             String title = bundle.getString("title");
             if (title == null) {
@@ -312,9 +312,10 @@ public class RNPushNotificationHelper {
 
             if (largeIcon != null) {
                 largeIconResId = res.getIdentifier(largeIcon, "mipmap", packageName);
-            } else {
-                largeIconResId = res.getIdentifier("ic_launcher", "mipmap", packageName);
-            }
+            } 
+            // else {
+            //     largeIconResId = res.getIdentifier("ic_launcher", "mipmap", packageName);
+            // }
 
             Bitmap largeIconBitmap = BitmapFactory.decodeResource(res, largeIconResId);
 
@@ -670,9 +671,9 @@ public class RNPushNotificationHelper {
 
       int importance = NotificationManager.IMPORTANCE_HIGH;
 
-      String channel_id = NOTIFICATION_CHANNEL_ID + "-" + importance + "-" + DEFAULT_VIBRATION;
+      String channel_id = this.config.getChannelId() != null ? this.config.getChannelId() : NOTIFICATION_CHANNEL_ID + "-" + importance + "-" + DEFAULT_VIBRATION;
 
-      checkOrCreateChannel(manager, this.config.getChannelId() != null ? this.config.getChannelId() : channel_id, null, importance, new long[] {0, DEFAULT_VIBRATION});
+      checkOrCreateChannel(manager, channel_id, null, importance, new long[] {0, DEFAULT_VIBRATION});
     }
 
     private void checkOrCreateChannel(NotificationManager manager, String channel_id, Uri soundUri, int importance, long[] vibratePattern) {
