@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 class RNPushNotificationConfig {
+    private static final String KEY_CHANNEL_ID = "com.dieam.reactnativepushnotification.notification_channel_id";
     private static final String KEY_CHANNEL_NAME = "com.dieam.reactnativepushnotification.notification_channel_name";
     private static final String KEY_CHANNEL_DESCRIPTION = "com.dieam.reactnativepushnotification.notification_channel_description";
     private static final String KEY_NOTIFICATION_COLOR = "com.dieam.reactnativepushnotification.notification_color";
@@ -62,5 +63,13 @@ class RNPushNotificationConfig {
         }
         // Default
         return -1;
+    }
+    public String getChannelId() {
+        try {
+            return metadata.getString(KEY_CHANNEL_ID);
+        } catch (Exception e) {
+            Log.w(RNPushNotification.LOG_TAG, "Unable to find " + KEY_CHANNEL_ID + " in manifest. Falling back to default");
+        }
+        return "";
     }
 }

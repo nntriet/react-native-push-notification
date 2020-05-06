@@ -672,7 +672,7 @@ public class RNPushNotificationHelper {
 
       String channel_id = NOTIFICATION_CHANNEL_ID + "-" + importance + "-" + DEFAULT_VIBRATION;
 
-      checkOrCreateChannel(manager, channel_id, null, importance, new long[] {0, DEFAULT_VIBRATION});
+      checkOrCreateChannel(manager, this.config.getChannelId() != null ? this.config.getChannelId() : channel_id, null, importance, new long[] {0, DEFAULT_VIBRATION});
     }
 
     private void checkOrCreateChannel(NotificationManager manager, String channel_id, Uri soundUri, int importance, long[] vibratePattern) {
