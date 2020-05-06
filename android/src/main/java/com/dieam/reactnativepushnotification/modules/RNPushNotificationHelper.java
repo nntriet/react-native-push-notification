@@ -292,7 +292,7 @@ public class RNPushNotificationHelper {
             }
 
             int smallIconResId;
-            int largeIconResId;
+            int largeIconResId = 0;
 
             String smallIcon = bundle.getString("smallIcon");
 
