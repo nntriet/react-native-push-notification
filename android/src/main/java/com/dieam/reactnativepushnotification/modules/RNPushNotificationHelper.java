@@ -370,6 +370,11 @@ public class RNPushNotificationHelper {
                 notification.setSound(soundUri);
             }
 
+            if (bundle.containsKey("playSound") && !bundle.getBoolean("playSound") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // API 26 and higher
+                channel_id = channel_id + "-" + "nosound";
+                soundUri = null;
+            }
+
             if (soundUri == null || Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 notification.setSound(null);
             }
