@@ -411,7 +411,7 @@ public class RNPushNotificationHelper {
             }
             Log.d("REACT_NATIVE", "NOTIFICATION_MANAGER_CHANNEL_ID: " + channel_id);
             String default_notification_channel_id = this.config.getChannelId() + "-" + NotificationManager.IMPORTANCE_HIGH + "-" + DEFAULT_VIBRATION;
-            if (channel_id === default_notification_channel_id){
+            if (channel_id == default_notification_channel_id){
                 channel_id = this.config.getChannelId() != null ? this.config.getChannelId() : NOTIFICATION_CHANNEL_ID;
             }
             checkOrCreateChannel(notificationManager, channel_id, soundUri, importance, vibratePattern);
