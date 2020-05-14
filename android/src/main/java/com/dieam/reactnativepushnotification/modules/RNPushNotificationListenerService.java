@@ -15,8 +15,10 @@ import android.util.Log;
 import com.dieam.reactnativepushnotification.helpers.ApplicationBadgeHelper;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.WritableMap;
 
 import org.json.JSONObject;
 
@@ -26,6 +28,45 @@ import java.util.Random;
 import static com.dieam.reactnativepushnotification.modules.RNPushNotification.LOG_TAG;
 
 public class RNPushNotificationListenerService extends FirebaseMessagingService {
+
+    @Override
+    public void onNewToken(String token) {
+        final String deviceToken = token;
+        Log.d(LOG_TAG, "Refreshed token: " + deviceToken);
+
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            public void run() {
+                // Construct and load our normal React JS code bundle
+                ReactInstanceManager mReactInstanceManager = ((ReactApplication) getApplication()).getReactNativeHost().getReactInstanceManager();
+                ReactContext context = mReactInstanceManager.getCurrentReactContext();
+                // If it's constructed, send a notificationre
+                if (context != null) {
+                    handleNewToken((ReactApplicationContext) context, deviceToken);
+                } else {
+                    // Otherwise wait for construction, then send the notification
+                    mReactInstanceManager.addReactInstanceEventListener(new ReactInstanceManager.ReactInstanceEventListener() {
+                        public void onReactContextInitialized(ReactContext context) {
+                            handleNewToken((ReactApplicationContext) context, deviceToken);
+                        }
+                    });
+                    if (!mReactInstanceManager.hasStartedCreatingInitialContext()) {
+                        // Construct it in the background
+                        mReactInstanceManager.createReactContextInBackground();
+                    }
+                }
+            }
+        });
+    }
+
+    private void handleNewToken(ReactApplicationContext context, String token) {
+        RNPushNotificationJsDelivery jsDelivery = new RNPushNotificationJsDelivery(context);
+
+        WritableMap params = Arguments.createMap();
+        params.putString("deviceToken", token);
+        jsDelivery.sendEvent("remoteNotificationsRegistered", params);
+    }
+
 
     @Override
     public void onMessageReceived(RemoteMessage message) {
@@ -87,7 +128,7 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
                 // Construct and load our normal React JS code bundle
                 ReactInstanceManager mReactInstanceManager = ((ReactApplication) getApplication()).getReactNativeHost().getReactInstanceManager();
                 ReactContext context = mReactInstanceManager.getCurrentReactContext();
-                // If it's constructed, send a notification
+                // If it's constructed, send a notificationre
                 if (context != null) {
                     handleRemotePushNotification((ReactApplicationContext) context, bundle);
                 } else {
@@ -122,6 +163,8 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
             bundle.putString("id", String.valueOf(randomNumberGenerator.nextInt()));
         }
 
+        RNPushNotificationConfig config = new RNPushNotificationConfig(getApplication());
+
         Boolean isForeground = isApplicationInForeground();
 
         RNPushNotificationJsDelivery jsDelivery = new RNPushNotificationJsDelivery(context);
@@ -135,7 +178,8 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
         }
 
         Log.v(LOG_TAG, "sendNotification: " + bundle);
-        if (!isForeground) {
+
+        if (config.getNotificationForeground() || !isForeground) {
             Application applicationContext = (Application) context.getApplicationContext();
             RNPushNotificationHelper pushNotificationHelper = new RNPushNotificationHelper(applicationContext);
             pushNotificationHelper.sendToNotificationCentre(bundle);
@@ -147,12 +191,10 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
         List<RunningAppProcessInfo> processInfos = activityManager.getRunningAppProcesses();
         if (processInfos != null) {
             for (RunningAppProcessInfo processInfo : processInfos) {
-                if (processInfo.processName.equals(getApplication().getPackageName())) {
-                    if (processInfo.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
-                        for (String d : processInfo.pkgList) {
-                            return true;
-                        }
-                    }
+                if (processInfo.processName.equals(getApplication().getPackageName())
+                    && processInfo.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+                    && processInfo.pkgList.length > 0) {
+                    return true;
                 }
             }
         }

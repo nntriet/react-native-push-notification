@@ -410,14 +410,17 @@ public class RNPushNotificationHelper {
                     vibration = DEFAULT_VIBRATION;
                 
                 channel_id = channel_id + "-" + vibration;
+
                 vibratePattern = new long[]{0, vibration};
 
                 notification.setVibrate(vibratePattern);
             }
+
             String default_notification_channel_id = this.config.getChannelId() + "-" + NotificationManager.IMPORTANCE_HIGH + "-" + DEFAULT_VIBRATION;
             if (channel_id.equals(default_notification_channel_id)){
                 channel_id = this.config.getChannelId() != null ? this.config.getChannelId() : NOTIFICATION_CHANNEL_ID;
             }
+
             checkOrCreateChannel(notificationManager, channel_id, soundUri, importance, vibratePattern);
 
             notification.setChannelId(channel_id);
@@ -677,9 +680,9 @@ public class RNPushNotificationHelper {
       NotificationManager manager = notificationManager();
 
       int importance = NotificationManager.IMPORTANCE_HIGH;
-
       String channel_id = this.config.getChannelId() != null ? this.config.getChannelId() : NOTIFICATION_CHANNEL_ID;
       Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
       checkOrCreateChannel(manager, channel_id, soundUri, importance, new long[] {0, DEFAULT_VIBRATION});
     }
 
@@ -690,6 +693,7 @@ public class RNPushNotificationHelper {
             return;
 
         NotificationChannel channel = manager.getNotificationChannel(channel_id);
+        Log.d("REACT_NATIVE", "NOTIFICATION_CHANNEL_ID: " + channel_id);
 
         if (channel == null) {
             channel = new NotificationChannel(channel_id, this.config.getChannelName() != null ? this.config.getChannelName() : "rn-push-notification-channel", importance);
